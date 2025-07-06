@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Product Recommender</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <img src="https://placehold.co/40x40"
+                            alt="Smart Recommender logo with a purple gradient circular background"
+                            class="h-8 w-8 rounded-full">
+                        <span class="ml-2 text-xl font-semibold text-gray-900">SmartRecommender</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="#"
+                            class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="#"
+                            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Products</a>
+                        <a href="#"
+                            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Recommendations</a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <button type="button"
+                        class="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <span class="sr-only">View notifications</span>
+                        <i class="fas fa-bell h-6 w-6"></i>
+                    </button>
+                    <div class="ml-3 relative">
+                        <div class="flex items-center">
+                            <div>
+                                <button type="button"
+                                    class="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    id="user-menu-button">
+                                    <span class="sr-only">Open user menu</span>
+                                    <img class="h-8 w-8 rounded-full" src="https://placehold.co/32x32"
+                                        alt="User profile photo with abstract colorful pattern">
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-gradient">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:py-16 sm:px-6 lg:px-8 lg:py-20">
+            <div class="text-center">
+                <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                    Smart Product Recommendations
+                </h1>
+                <p class="mt-6 max-w-2xl mx-auto text-xl text-indigo-100">
+                    Discover products you'll love with our AI-powered hybrid recommendation engine.
+                </p>
+                <div class="mt-10 relative max-w-md mx-auto sm:max-w-none sm:flex sm:justify-center">
+                    <div class="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+                        <button id="demo-button"
+                            class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-white hover:bg-indigo-50 md:py-4 md:text-lg md:px-10">
+                            Try Demo Recommendations
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Recommendation Filters -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Find Recommendations</h2>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700">Product Category</label>
+                    <select id="category"
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option>All Categories</option>
+                        <option>Electronics</option>
+                        <option>Clothing</option>
+                        <option>Home & Kitchen</option>
+                        <option>Books</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="price-range" class="block text-sm font-medium text-gray-700">Price Range</label>
+                    <select id="price-range"
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option>Any Price</option>
+                        <option>Under ₹500</option>
+                        <option>₹500 - ₹2000</option>
+                        <option>₹2000 - ₹5000</option>
+                        <option>Over ₹5000</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="algorithm" class="block text-sm font-medium text-gray-700">Algorithm</label>
+                    <select id="algorithm"
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option>Hybrid (Collaborative + Content)</option>
+                        <option>Content-Based (TF-IDF)</option>
+                        <option>Collaborative (KNN)</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button id="find-recommendations" type="button"
+                        class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Find Recommendations
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Recommendation Content -->
+        <div id="demo-content" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Recommended For You</h2>
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-500 mr-2">Based on your interests</span>
+                    <div class="flex items-center">
+                        <span class="mr-2 text-sm font-medium text-gray-700">Confidence</span>
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                            85%
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="products-grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <!-- Product cards will be added here dynamically -->
+            </div>
+
+            <!-- Algorithm Explanation -->
+            <div class="mt-12 bg-indigo-50 rounded-lg p-6">
+                <h3 class="text-lg font-medium text-indigo-900 mb-3">How We Recommend</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <div class="flex items-center mb-2">
+                            <div
+                                class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                                <i class="fas fa-font"></i>
+                            </div>
+                            <h4 class="ml-3 text-base font-medium text-gray-900">Content-Based Filtering</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Analyzes product descriptions using TF-IDF and cosine
+                            similarity to find items with similar content.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <div class="flex items-center mb-2">
+                            <div
+                                class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-md bg-purple-500 text-white">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h4 class="ml-3 text-base font-medium text-gray-900">Collaborative Filtering</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Uses KNN or SVD to recommend products that similar users have
+                            liked, based on implicit/explicit feedback.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <div class="flex items-center mb-2">
+                            <div
+                                class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
+                                <i class="fas fa-project-diagram"></i>
+                            </div>
+                            <h4 class="ml-3 text-base font-medium text-gray-900">Hybrid Approach</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Combines both techniques using weighted averages or switching
+                            between them based on available data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg p-6 flex flex-col items-center">
+            <div class="loading-spinner rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+            <p class="text-lg text-gray-700">Analyzing products and finding recommendations...</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const demoButton = document.getElementById('demo-button');
+            const findRecommendations = document.getElementById('find-recommendations');
+            const demoContent = document.getElementById('demo-content');
+            const productsGrid = document.getElementById('products-grid');
+            const loadingState = document.getElementById('loading-state');
+
+            // Sample product data (in a real app, this would come from your Python backend)
+            const sampleProducts = [
+                {
+                    id: 1,
+                    name: "Wireless Bluetooth Headphones",
+                    description: "Premium noise-cancelling headphones with 30-hour battery life",
+                    category: "Electronics",
+                    price: "₹2,499",
+                    rating: 4.5,
+                    imageAlt: "Modern wireless headphones with black finish and over-ear design"
+                },
+                {
+                    id: 2,
+                    name: "Smart Fitness Band",
+                    description: "Track your heart rate, steps, and sleep with this sleek fitness band",
+                    category: "Electronics",
+                    price: "₹1,799",
+                    rating: 4.2,
+                    imageAlt: "Black fitness band with OLED display showing heart rate metrics"
+                },
+                {
+                    id: 3,
+                    name: "Organic Cotton T-Shirt",
+                    description: "Comfortable and sustainable t-shirt made from 100% organic cotton",
+                    category: "Clothing",
+                    price: "₹599",
+                    rating: 4.0,
+                    imageAlt: "White t-shirt laid flat on wooden background showing minimalist design"
+                },
+                {
+                    id: 4,
+                    name: "Stainless Steel Water Bottle",
+                    description: "Insulated 1L water bottle that keeps drinks cold for 24 hours",
+                    category: "Home & Kitchen",
+                    price: "₹899",
+                    rating: 4.7,
+                    imageAlt: "Silver stainless steel water bottle with black matte finish and flip-top lid"
+                },
+                {
+                    id: 5,
+                    name: "Machine Learning Book",
+                    description: "Comprehensive guide to machine learning algorithms and applications",
+                    category: "Books",
+                    price: "₹1,299",
+                    rating: 4.8,
+                    imageAlt: "Book cover with abstract geometric patterns in blue and orange"
+                },
+                {
+                    id: 6,
+                    name: "Wireless Gaming Mouse",
+                    description: "High-precision gaming mouse with customizable RGB lighting",
+                    category: "Electronics",
+                    price: "₹1,499",
+                    rating: 4.4,
+                    imageAlt: "Black gaming mouse with RGB lighting and ergonomic design"
+                },
+                {
+                    id: 7,
+                    name: "Yoga Mat",
+                    description: "Non-slip, eco-friendly yoga mat with carrying strap",
+                    category: "Fitness",
+                    price: "₹799",
+                    rating: 4.3,
+                    imageAlt: "Purple yoga mat rolled up with carrying strap on wooden floor"
+                },
+                {
+                    id: 8,
+                    name: "Smart Watch",
+                    description: "Features GPS, heart rate monitor, and smartphone notifications",
+                    category: "Electronics",
+                    price: "₹3,999",
+                    rating: 4.6,
+                    imageAlt: "Black smartwatch on wrist displaying fitness metrics"
+                }
+            ];
+
+            // Function to render product cards
+            function renderProducts(products) {
+                productsGrid.innerHTML = '';
+
+                products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card bg-white rounded-lg shadow-md overflow-hidden flex flex-col';
+
+                    productCard.innerHTML = `
+                        <div class="relative pb-2/3 h-48">
+                            <img src="https://placehold.co/300x200" alt="${product.imageAlt}" class="absolute h-full w-full object-cover">
+                        </div>
+                        <div class="p-4 flex-grow">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-lg font-medium text-gray-900">${product.name}</h3>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-star mr-1"></i> ${product.rating}
+                                </span>
+                            </div>
+                            <p class="mt-1 text-sm text-gray-600">${product.category}</p>
+                            <p class="mt-2 text-sm text-gray-500 line-clamp-2">${product.description}</p>
+                        </div>
+                        <div class="px-4 pb-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-bold text-gray-900">${product.price}</span>
+                                <button class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    productsGrid.appendChild(productCard);
+                });
+            }
+
+            // Event listeners
+            demoButton.addEventListener('click', function () {
+                loadingState.classList.remove('hidden');
+
+                // Simulate API call with timeout
+                setTimeout(() => {
+                    loadingState.classList.add('hidden');
+                    demoContent.classList.remove('hidden');
+                    renderProducts(sampleProducts);
+                }, 1500);
+            });
+
+            findRecommendations.addEventListener('click', function () {
+                loadingState.classList.remove('hidden');
+                const category = document.getElementById('category').value;
+                const priceRange = document.getElementById('price-range').value;
+                const algorithm = document.getElementById('algorithm').value;
+
+                // Here you would normally make an API call to your Python backend
+                // with the selected filters and algorithm choice
+
+                // Simulate API response with timeout
+                setTimeout(() => {
+                    loadingState.classList.add('hidden');
+                    demoContent.classList.remove('hidden');
+
+                    // Filter sample products based on selected category (for demo)
+                    let filteredProducts = [...sampleProducts];
+
+                    if (category !== 'All Categories') {
+                        filteredProducts = filteredProducts.filter(product => product.category === category);
+                    }
+
+                    if (priceRange === 'Under ₹500') {
+                        filteredProducts = filteredProducts.filter(product => parseInt(product.price.replace(/[^0-9]/g, '')) < 500);
+                    } else if (priceRange === '₹500 - ₹2000') {
+                        filteredProducts = filteredProducts.filter(product => {
+                            const price = parseInt(product.price.replace(/[^0-9]/g, ''));
+                            return price >= 500 && price <= 2000;
+                        });
+                    } else if (priceRange === '₹2000 - ₹5000') {
+                        filteredProducts = filteredProducts.filter(product => {
+                            const price = parseInt(product.price.replace(/[^0-9]/g, ''));
+                            return price >= 2000 && price <= 5000;
+                        });
+                    } else if (priceRange === 'Over ₹5000') {
+                        filteredProducts = filteredProducts.filter(product => parseInt(product.price.replace(/[^0-9]/g, '')) > 5000);
+                    }
+
+                    renderProducts(filteredProducts);
+
+                    // Scroll to recommendations
+                    setTimeout(() => {
+                        demoContent.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+
+</html>
